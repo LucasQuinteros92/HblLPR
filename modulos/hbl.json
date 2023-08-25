@@ -276,8 +276,8 @@
             "dhcp": 1,
             "static_ip_address": "192.168.1.1/24",
             "static_routers": "192.168.1.1",
-            "ssid": "TeleCentro-1955",
-            "password": "ChocloMomo",
+            "ssid": "JPH SUB 2G",
+            "password": "Leones2023",
             "metric": 201
         },
         "ppp0": {

@@ -367,9 +367,13 @@ def escribeParametros():
     parametrosNet = ['hostname', 'clientid', 'persistent', 'option rapid_commit', 'option domain_name_servers, domain_name, domain_search, host_name', 'option classless_static_routes','option ntp_servers', 'option interface_mtu', 'require dhcp_server_identifier', 'slaac private', ' ']
     auxiliar.append_multiple_lines('/etc/dhcpcd.conf', parametrosNet, "w+") 
     
+    parametrosNet = [' ', 'source-directory /etc/network/interfaces.d', 'auto lo', 'iface lo inet loopback', ' ']
+    auxiliar.append_multiple_lines('/etc/network/interfaces', parametrosNet, "w+")
     # ************************************************************************************************************************************************
     # eth0
     if hbl.NETWORK_eth0_activado == 1:
+        os.system("sudo ifconfig eth0 up") ##Habilita el puerto ethernet
+        time.sleep(1)
         # si está habilitado el dhcp, escribe la configuracion pero la comenta para que no tenga efecto
         if hbl.NETWORK_eth0_dhcp == 1:
             parametrosNet = ['interface eth0', '#metric ' + str(hbl.NETWORK_eth0_metric), '#static ip_address=' + str(hbl.NETWORK_eth0_static_ip_address), '#static routers=' + str(hbl.NETWORK_eth0_static_routers)] 
@@ -404,7 +408,9 @@ def escribeParametros():
         parametrosNet = [' ']
         auxiliar.append_multiple_lines('/etc/dhcpcd.conf', parametrosNet, "a+")
         auxiliar.append_multiple_lines('/etc/network/interfaces', parametrosNet, "a+")
-
+    else:
+        os.system("sudo ifconfig eth0 down")## Deshabilita el puerto ethernet
+        time.sleep(1)
         # ejecutar el comando ifdown / ifup : al cambiar de static a dhcp se detecto un problema que se corrigio con ese comando.
         # os.system("sudo ifdown eth0")
         # time.sleep(1)
@@ -451,10 +457,14 @@ def escribeParametros():
     # ************************************************************************************************************************************************
     # wlan0
     if hbl.NETWORK_wlan0_activado == 1:
+        os.system("sudo ifconfig wlan0 up")
+        time.sleep(1)
         # si está habilitado el dhcp, escribe la configuracion pero la comenta para que no tenga efecto
         if hbl.NETWORK_wlan0_dhcp == 1:
             parametrosNet = [' ' , 'interface wlan0', 'metric ' + str(hbl.NETWORK_wlan0_metric), '#static ip_address=' + str(hbl.NETWORK_wlan0_static_ip_address), '#static routers=' + str(hbl.NETWORK_wlan0_static_routers)] 
             auxiliar.append_multiple_lines('/etc/dhcpcd.conf', parametrosNet, "a+")
+            parametrosNet = [' ','allow-hotplug wlan0','iface wlan0 inet manual']   # Te habilita el simbolito azul de WIFI 
+            auxiliar.append_multiple_lines('/etc/network/interfaces', parametrosNet, "a+")
         else:
             # se agregan los parametros de IP estatica al archivo dhcpcf.conf
             parametrosNet = [' ' , 'interface wlan0', 'metric ' + str(hbl.NETWORK_wlan0_metric), 'static ip_address=' + str(hbl.NETWORK_wlan0_static_ip_address), 'static routers=' + str(hbl.NETWORK_wlan0_static_routers)] 
@@ -471,7 +481,9 @@ def escribeParametros():
                   
         parametrosNet = [' ' , 'network={', '    ssid="' + str(hbl.NETWORK_wlan0_ssid) + '"', '    psk="' + str(hbl.NETWORK_wlan0_password) + '"', '}']
         auxiliar.append_multiple_lines('/etc/wpa_supplicant/wpa_supplicant.conf', parametrosNet, "a+")
-   
+    else:
+        os.system("sudo ifconfig wlan0 down")
+        time.sleep(1)
     # ************************************************************************************************************************************************
     # ppp0 
     # si esta activada la interfaz de modem gsm, la selecciona como la default para la conectividad a internet.
