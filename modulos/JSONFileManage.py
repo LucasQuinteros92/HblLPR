@@ -36,7 +36,6 @@ class JSONFileManage(object):
     def add_Y_InFile(self,id,plate):
         '''
             Agrega una patente al id, en formato json.
-            Ninguno de estos campos puede ser nulo.
             Devuelve diccionario actualizado con los cambios realizados.
             Sino Devuelve que salio mal
         '''
