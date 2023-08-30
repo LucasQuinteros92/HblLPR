@@ -118,7 +118,7 @@
             "product_ID": "0x0001"
         },
         "device2": {
-            "activado": 1,
+            "activado": 0,
             "bufferSize": 20,
             "timeout": 20000,
             "endpoint": "0x81",
@@ -134,7 +134,7 @@
             "product_ID": "0x0035"
         },
         "device4": {
-            "activado": 1,
+            "activado": 0,
             "bufferSize": 20,
             "timeout": 200,
             "endpoint": "0x84",
@@ -343,7 +343,7 @@
     "HBLNAME_ID": 10000000,
     "versionHBL": "1.0",
     "cacheo": {
-        "activado": 1,
+        "activado": 0,
         "cantidadCacheos": 10,
         "cacheosPositivos": 2,
         "tiempoRelePositivo": 1,

@@ -64,6 +64,7 @@ def receiveSignal(signalNumber, frame):
    pi.stop()                          # detiene el pigpiod
    os.system("sudo killall pigpiod")  # elimina el deamon del pigpiod
    os.system("sudo killall wvdial")   # eliminar proceso del modem  
+   
    #os.system("sudo killall python3")
    #sys.exit()                         # sale del hbl
  
@@ -152,5 +153,8 @@ if __name__ == "__main__":
    salidas.stop()
    serial.stop()
    
-   w.cancel()
+   if hbl.WD_port0_activado == 1:
+      w.cancel()
+      
    pi.stop() 
+   print("HBL STOPPED")

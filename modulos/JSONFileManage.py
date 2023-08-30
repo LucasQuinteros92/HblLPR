@@ -41,10 +41,10 @@ class JSONFileManage(object):
             Sino Devuelve que salio mal
         '''
         try:
-            if str(plate) == "":
-                errorStr = "ERROR: Patente VACIA"
-                self.__LogReport(errorStr)
-                return errorStr
+            #if str(plate) == "":
+            #    errorStr = "ERROR: Patente VACIA"
+            #    self.__LogReport(errorStr)
+            #    return errorStr
             if str(id) == "":
                 errorStr = "ERROR: DNI VACIO"
                 self.__LogReport( errorStr)

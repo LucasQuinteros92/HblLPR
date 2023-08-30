@@ -120,11 +120,11 @@ class Validacion_Doble_Factor(object):
         
         return evento
 
-    def generarEventoReporte(self,DNI,patente = ""):
+    def generarEventoReporte(self,evento,DNI="",patente = ""):
         now = datetime.now()
         date = datetime.timestamp(now)
         evento = json.dumps({
-            "evento" : "nuevoIngreso",
+            "evento" : evento,
             "datos" : {
                 "Persona": DNI,
                 "Vehiculo" : patente,
@@ -157,7 +157,7 @@ class Validacion_Doble_Factor(object):
                 self.objWebSock.send_message(str(evento))
                 time.sleep(0.1)
             self.eliminarPendientes()
-            print("enviando pendientes")
+            #print("enviando pendientes")
 
     def hayPendientes(self):
         return os.path.exists(hbl.Validacion_Doble_Factor_reportFile)
@@ -202,7 +202,11 @@ class Validacion_Doble_Factor(object):
                 self.objWebSock.reconnected = False
                 self.objWebSock.ws.on_message = self.nuevoEventoRecibido
                 self.siHayPendientesEnviarAlServer()
-
+                
+            if self.seDetectoPatente():
+                    self.reportarDeteccion(self.seDetectoPatente())
+                    self.borrarPatenteDetectada()
+                
             self.newDNI = self.get_dni()
              
             if self.newDNI != "NULL":
@@ -257,11 +261,11 @@ class Validacion_Doble_Factor(object):
         if self.factorDobleActivado():
             patente = self.validar_patente()
             self.__LogReport(patente, FACTOR_DOBLE)
-            self.reportar(patente)
+            self.siElDniEsNuevoReportar(patente)
             
         else:
             self.__LogReport("-", FACTOR_SIMPLE)
-            self.reportar("-")
+            self.siElDniEsNuevoReportar("-")
 
     def PermitirAcceso(self):
         
@@ -311,6 +315,12 @@ class Validacion_Doble_Factor(object):
     def abrir_barrera(self):
         """Esta bien abrir la barrera asi ?"""
         salidas.Salidas(self.pi).activaSalida(pin=hbl.DIG_out_pin_out1,tiempo=3000)
+    
+    def seDetectoPatente(self):
+        return VG.ultimaPatente
+    
+    def borrarPatenteDetectada(self):
+        VG.ultimaPatente = ""
         
     def get_patentes_from_LPR(self):
         '''
@@ -318,16 +328,23 @@ class Validacion_Doble_Factor(object):
         '''
         return VG.listaPatentes
         
-    def reportar(self,patente):
+    def reportarDeteccion(self,patente):
         
-            if self.lastDNI_reportado != self.newDNI:
-                
-                self.lastDNI_reportado = self.newDNI
-                now = datetime.now()#.strftime('%Y-%m-%d %H:%M:%S')
-                #evento = {"RUT":self.newDNI, "Patente":patente, "FechaHora":datetime.timestamp(now),"id":hbl.HblID}
-                eventoEntrada = self.generarEventoReporte(self.newDNI,patente)
-                self.enviar_AlServerSiEstaConectado(eventoEntrada)
-                #self.guardarEvento(eventoEntrada)
+        eventoNuevaDeteccion = self.generarEventoReporte("nuevaPatente",patente=patente)
+        self.reportar(eventoNuevaDeteccion)
+    
+    def siElDniEsNuevoReportar(self,patente):
+        
+        if self.lastDNI_reportado != self.newDNI:
+            
+            self.lastDNI_reportado = self.newDNI
+            now = datetime.now()#.strftime('%Y-%m-%d %H:%M:%S')
+            #evento = {"RUT":self.newDNI, "Patente":patente, "FechaHora":datetime.timestamp(now),"id":hbl.HblID}
+            eventoEntrada = self.generarEventoReporte("nuevoIngreso",self.newDNI,patente)
+            self.reportar(eventoEntrada)
+            
+    def reportar(self,evento):
+            self.enviar_AlServerSiEstaConectado(evento)
 
     def guardarEvento(self, evento):
             try:

@@ -66,15 +66,17 @@ class WebSocket(object):
             log.escribeLineaLog(hbl.LOGS_WebSocket,"Conexion no establecida")
 
     def __run(self):
-        
-        self.ws.run_forever(reconnect= 2, 
-                            ping_interval= 5,
-                            ping_timeout= 3,
-                            sslopt={"cert_reqs": ssl.CERT_NONE})  
-        # Set dispatcher to automatic reconnection,
-        # 5 second reconnect delay if connection closed unexpectedly
-        
-        #sslopt={"cert_reqs": ssl.CERT_NONE}
+        try:
+            self.ws.run_forever(reconnect= 2, 
+                                ping_interval= 5,
+                                ping_timeout= 3,
+                                sslopt={"cert_reqs": ssl.CERT_NONE})  
+            # Set dispatcher to automatic reconnection,
+            # 5 second reconnect delay if connection closed unexpectedly
+            
+            #sslopt={"cert_reqs": ssl.CERT_NONE}
+        except:
+            pass
         
     def on_open(self,ws):
         self.connected = True
@@ -105,7 +107,7 @@ class WebSocket(object):
 
     def on_close(self,ws, close_status_code, close_msg):
         self.connected = False
-
+        self.ws.close()
         self.__LogReport("Conexion Terminada\n"+"close msg: " + str(close_msg) + 
                         "\ncode: "+ str(close_status_code))
         if self.reRun:

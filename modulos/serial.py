@@ -45,7 +45,7 @@ def startThreadSerial():
                         bytesize=hbl.SERIAL_bytesize, 
                         parity=hbl.SERIAL_parity, 
                         stopbits=hbl.SERIAL_stopbits, 
-                        timeout=0.1)
+                        timeout=1)
     ser.flushInput()
     
     cLPR = LPR("","","")
@@ -72,6 +72,7 @@ def startThreadSerial():
                         """Elimino el ultimo caracter porque la camara me agrega una U al final"""
                         cLPR.Patente = cLPR.decodedData[:-1]
                         cLPR.Patente=cLPR.Patente.replace("\x00","")
+                        variablesGlobales.ultimaPatente = cLPR.Patente
                     except Exception as e:
                         print("Error en la lectura de patente")
                         cLPR.Patente = str(cLPR.dataSerial)
@@ -95,7 +96,8 @@ def startThreadSerial():
                 log.escribeLineaLog(hbl.LOGS_hblSerial, "Error : " + str(errorExcepcion)) 
         
         time.sleep(0.01)
-    
+
+        
 """ --------------------------------------------------------------------------------------------
 
     inicializacion comunicacion Serial

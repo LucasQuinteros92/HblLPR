@@ -39,6 +39,7 @@ listaAleatoria = []
 HBLCORE_contadorReset = 0
 pressTick = 0
 
+ultimaPatente = ""
 listaPatentes = ["NULL"] * 10
 listaDNIs = []
 
