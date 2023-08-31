@@ -88,7 +88,7 @@ class Validacion_Doble_Factor(object):
         if evento == "nuevaVisita":
             #add : dict = evento.get("nuevaVisita")
             #self.agregar_Y_(add.get("id"),add.get("plate"))
-            res = self.BDJSON.add_Y_InFile(datos.get("Persona"),datos.get("Vehiculo"))
+            res = self.BDJSON.add_Y_InFile(datos.get("Persona"),datos.get("wiegand"),datos.get("Vehiculo"))
            
         elif evento ==  "remove":
             #remove :dict = datos.get("remove")
@@ -387,6 +387,13 @@ class Validacion_Doble_Factor(object):
 
     def resetNewDNI(self):
         VG.lastDNI_WD = "NULL"
+        
+    def get_dni(self):
+        '''
+            devuelve dni asociado al wiegand leido por la ras
+        '''
+        
+        return self.BDJSON.getDNIfromWD(VG.lastDNI_WD)
 
     def validar_patente(self):
         '''
@@ -407,11 +414,7 @@ class Validacion_Doble_Factor(object):
         except Exception as e:
             return "NO MATCH"
          
-    def get_dni(self):
-        '''
-            devuelve dni leido por WD
-        '''
-        return str(VG.lastDNI_WD)
+
     
     def dniValido(self):
         '''

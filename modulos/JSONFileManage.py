@@ -81,6 +81,17 @@ class JSONFileManage(object):
             self.__LogReport( "Error al agregar data: " + str(e))
             return str(e)
     
+    
+    def getDNIfromWD(self,wiegand) :
+        dni = "NULL"
+        JSON :dict = self.getJSONFromFile()
+        personas = JSON.keys()
+        for p in personas:
+            if JSON[p]["wiegand"] == wiegand:
+                dni = p
+                
+        return str(dni)
+    
     def remove_Y_InFile(self,id,plate):
         try:
             JSON : dict = self.getJSONFromFile()
