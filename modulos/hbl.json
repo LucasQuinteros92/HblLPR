@@ -247,9 +247,9 @@
             "activado": 0,
             "modo": 1
         },
-        "serialNumber": "aa7bf5ad",
-        "revision": "00c03115",
-        "MAC_ethernet": "e4:5f:01:f3:85:f9",
+        "serialNumber": "f281567b",
+        "revision": "00c03112",
+        "MAC_ethernet": "dc:a6:32:52:9a:1f",
         "NTP": "time.cloudflare.com",
         "reset": {
             "resetActivado": 0,

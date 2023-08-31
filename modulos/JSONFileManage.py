@@ -5,6 +5,7 @@ from modulos import variablesGlobales as VG
 from modulos import hbl as hbl
 
 
+
 class JSONFileManage(object):
     
     def __init__(self, file):
@@ -33,7 +34,7 @@ class JSONFileManage(object):
             convert_file.write(json.dumps(newData,indent=6))
         VG.mutexBBDD_DNI_Patente.release()
             
-    def add_Y_InFile(self,id,plate):
+    def add_Y_InFile(self,id,wiegand,plate = ""):
         '''
             Agrega una patente al id, en formato json.
             Devuelve diccionario actualizado con los cambios realizados.
@@ -46,24 +47,29 @@ class JSONFileManage(object):
             #    return errorStr
             if str(id) == "":
                 errorStr = "ERROR: DNI VACIO"
-                self.__LogReport( errorStr)
+                self.__LogReport( errorStr )
                 return errorStr
             
             JSON :dict = self.getJSONFromFile()
-            patentes = JSON.get(str(id))
+            personaLocal : dict = JSON.get(str(id))
             
-            if patentes is None:
+            if personaLocal is None:
                 self.__LogReport( "Nuevo ID")
-                JSON[str(id)] = [str(plate)]
+                JSON[str(id)]["wiegand"] = str(wiegand)
+                if plate != "":
+                    JSON[str(id)]["patentes"] = [plate]
+                else:
+                    JSON[str(id)]["patentes"] = []
             else:
                 self.__LogReport( "ID ya existe")
                 """Check si la patente no esta ya"""
-                if str(plate) in patentes:
+                patentesPersonaLocal = personaLocal.get("patentes")
+                if str(plate) in patentesPersonaLocal:
                     errorStr = "ERROR: Patente ya existe"
-                    self.__LogReport( errorStr)
+                    self.__LogReport( errorStr )
                     return errorStr
                 else:
-                    JSON[str(id)].append(str(plate))
+                    JSON[str(id)]["patentes"].append(str(plate))
                 
             #print("newData" + str(JSON))
             self.WriteJSONAsFile(JSON)
@@ -110,3 +116,5 @@ class JSONFileManage(object):
         log.escribeSeparador(hbl.LOGS_FileManage)
         log.escribeLineaLog(hbl.LOGS_FileManage,mensaje)
        
+
+
