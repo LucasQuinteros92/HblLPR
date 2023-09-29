@@ -376,17 +376,10 @@
         "activado": 1,
         "WebSocket_Host": "wss://visitas-dev.jphlions.com/websocket-server/websocket/",
         "Api_Host": " wss://visitas-dpwsa.jphlions.com/websocket/websocket",
-        "Tipo_Evento": [
-            "VERIFY_SUCCESS_CARD",
-            "IDENTIFY_SUCCESS_FINGERPRINT"
-        ],
-        "Device_ID": "539325963",
-        "User": "admin",
-        "Password": "Jphlions135",
         "header": "Sec-WebSocket-Protocol:echo-protocol",
         "Token": "ABC1234",
         "ClientId": "100000001",
         "ClientName": "HBL1"
     },
-    "LPRVersion": "V1.1"
+    "LPRVersion": "V1.3"
 }

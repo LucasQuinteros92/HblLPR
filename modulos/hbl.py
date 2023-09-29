@@ -312,10 +312,6 @@ def cargarParametros(archivo):
     global WebSocket_activado
     global WebSocket_WebSocket_Host
     global WebSocket_Api_Host
-    global WebSocket_Tipo_Evento
-    global WebSocket_Device_ID
-    global WebSocket_User
-    global WebSocket_Password
     global WebSocket_Header           
    
     global WebSocket_Token
@@ -674,10 +670,6 @@ def cargarParametros(archivo):
     WebSocket_activado          =data["WebSocket"]["activado"]
     WebSocket_WebSocket_Host    =data["WebSocket"]["WebSocket_Host"]
     WebSocket_Api_Host          =data["WebSocket"]["Api_Host"]
-    WebSocket_Tipo_Evento       =data["WebSocket"]["Tipo_Evento"]
-    WebSocket_Device_ID         =data["WebSocket"]["Device_ID"]
-    WebSocket_User              =data["WebSocket"]["User"]
-    WebSocket_Password          =data["WebSocket"]["Password"]
     WebSocket_Header            =data["WebSocket"]["header"]
     WebSocket_ClientName        =data["WebSocket"]["ClientName"]
     WebSocket_ClientId          =data["WebSocket"]["ClientId"]
