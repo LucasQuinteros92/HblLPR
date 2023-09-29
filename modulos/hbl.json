@@ -101,12 +101,24 @@
         }
     },
     "serial": {
-        "port": "/dev/ttyS0",
-        "baudrate": 9600,
-        "bytesize": 8,
-        "parity": "N",
-        "stopbits": 1,
-        "activado": 1
+        "COM1": {
+            "activado": 1,
+            "port": "/dev/serial0",
+            "baudrate": 9600,
+            "bytesize": 8,
+            "parity": "N",
+            "stopbits": 1,
+            "timeout": 1
+        },
+        "COM2": {
+            "activado": 1,
+            "port": "/dev/ttyAMA2",
+            "baudrate": 9600,
+            "bytesize": 8,
+            "parity": "N",
+            "stopbits": 1,
+            "timeout": 1
+        }
     },
     "hidDevices": {
         "device1": {
@@ -237,7 +249,8 @@
         "hblRequest": "hblRequest.log",
         "hblDobleFactor": "hblDobleFactor.log",
         "hblWebSocket": "hblWebSocket.log",
-        "hblFileManage": "hblFileManage.log"
+        "hblFileManage": "hblFileManage.log",
+        "hblSalidas": "hblSalidas.log"
     },
     "funcionamiento": {
         "modo": 8
@@ -263,16 +276,18 @@
         "activado": 1,
         "eth0": {
             "activado": 1,
-            "dhcp": 1,
-            "static_ip_address": "192.168.1.1/24",
-            "static_routers": "192.168.1.1",
+            "dhcp": 0,
+            "static_ip_address": "172.30.2.131",
+            "static_routers": "",
+            "gateway": "172.30.2.1",
+            "DNS": "",
             "metric": 0,
-            "netmask": "255.255.255.0",
-            "network": "192.168.1.0",
-            "broadcast": "192.168.1.255"
+            "netmask": "255.255.254.0",
+            "network": "172.30.2.1",
+            "broadcast": "172.30.2.255"
         },
         "wlan0": {
-            "activado": 1,
+            "activado": 0,
             "dhcp": 1,
             "static_ip_address": "192.168.1.1/24",
             "static_routers": "192.168.1.1",
@@ -354,7 +369,8 @@
     "Validacion_Doble_Factor": {
         "activado": 1,
         "periodReport": 20,
-        "reportFile": "data.txt"
+        "reportFile": "data.txt",
+        "JSONBBDDPATH": "/usr/programas/hbl/modulos/BBDD_RUT_Patente.json"
     },
     "WebSocket": {
         "activado": 1,

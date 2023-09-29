@@ -45,7 +45,9 @@ from modulos import request as request
 from modulos import WebSocket as WebSocket
 import main
 global pi
-
+global objWebSock
+global cLPR_DNI
+global salidas
 
 STOP = True
 """ --------------------------------------------------------------------------------------------
@@ -60,14 +62,30 @@ def receiveSignal(signalNumber, frame):
    hidDevice.threadCount()
    global STOP
    STOP = False
-   w.cancel()                         # cancela el callback de wiegand
-   pi.stop()                          # detiene el pigpiod
-   os.system("sudo killall pigpiod")  # elimina el deamon del pigpiod
-   os.system("sudo killall wvdial")   # eliminar proceso del modem  
+   
+   #w.cancel()                         # cancela el callback de wiegand
+   #pi.stop()                          # detiene el pigpiod
+   #os.system("sudo killall pigpiod")  # elimina el deamon del pigpiod
+   #os.system("sudo killall wvdial")   # eliminar proceso del modem  
    
    #os.system("sudo killall python3")
    #sys.exit()                         # sale del hbl
  
+def stop():
+   global objWebSock
+   global cLPR_DNI
+   global salidas
+   objWebSock.stop()
+   cLPR_DNI.stop()   
+   salidas.stop()
+   serial.stop()
+   
+   #if hbl.WD_port0_activado == 1:
+   #   w.cancel()
+      
+   pi.stop() 
+   print("HBL STOPPED")
+   sys.exit()
 """ --------------------------------------------------------------------------------------------
 
    main
@@ -75,10 +93,10 @@ def receiveSignal(signalNumber, frame):
 -------------------------------------------------------------------------------------------- """
   
 if __name__ == "__main__":
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
    def callback():
       pass
-                                                                                                                    
+                                                                                                  
    pi = pigpio.pi()
 
    # cargar parametros del archivo de configuracion
@@ -135,6 +153,7 @@ if __name__ == "__main__":
    # Check inicial leds y buzzer
    hblCore.checkLedsBuzzer(pi) 
    
+   
    objWebSock = WebSocket.WebSocket()
    
    #cRequest = request.requestnblck(modo=0,dataType=2,file="data.json").start()
@@ -143,7 +162,11 @@ if __name__ == "__main__":
    cLPR_DNI = dobleFactor_LPR_DNI.Validacion_Doble_Factor(objWebSock,pi=pi )
    
    # heartbeat hblCore
-  
+   print("PID NUMBER",os.getpid())
+   with open("PIDNUMBER.txt","w") as f:
+        f.write(os.getpid().__str__())
+        
+   print("HBL READY")
    while STOP:
       hblCore.heartBeat(pi)
       hblCore.oledRefresh()   
@@ -153,8 +176,12 @@ if __name__ == "__main__":
    salidas.stop()
    serial.stop()
    
-   if hbl.WD_port0_activado == 1:
-      w.cancel()
+   #if hbl.WD_port0_activado == 1:
+   #   w.cancel()
       
    pi.stop() 
    print("HBL STOPPED")
+   sys.exit()
+
+ 
+   

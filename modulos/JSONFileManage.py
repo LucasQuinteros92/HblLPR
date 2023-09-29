@@ -55,11 +55,13 @@ class JSONFileManage(object):
             
             if personaLocal is None:
                 self.__LogReport( "Nuevo ID")
+                JSON[str(id)] = {}
                 JSON[str(id)]["wiegand"] = str(wiegand)
-                if plate != "":
+                JSON[str(id)]["patentes"] = []
+                if plate.strip() != "":
                     JSON[str(id)]["patentes"] = [plate]
-                else:
-                    JSON[str(id)]["patentes"] = []
+                
+                    
             else:
                 self.__LogReport( "ID ya existe")
                 """Check si la patente no esta ya"""
@@ -87,7 +89,8 @@ class JSONFileManage(object):
         JSON :dict = self.getJSONFromFile()
         personas = JSON.keys()
         for p in personas:
-            if JSON[p]["wiegand"] == wiegand:
+            #print(wiegand)
+            if JSON[p]["wiegand"] == str(wiegand):
                 dni = p
                 
         return str(dni)

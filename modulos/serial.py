@@ -40,12 +40,18 @@ def startThreadSerial():
 
     global pi
 
-    ser = serial.Serial(port=hbl.SERIAL_port, 
-                        baudrate=hbl.SERIAL_baudrate, 
-                        bytesize=hbl.SERIAL_bytesize, 
-                        parity=hbl.SERIAL_parity, 
-                        stopbits=hbl.SERIAL_stopbits, 
-                        timeout=1)
+    #ser = serial.Serial(port=hbl.SERIAL_port, 
+    #                    baudrate=hbl.SERIAL_baudrate, 
+    #                    bytesize=hbl.SERIAL_bytesize, 
+    #                    parity=hbl.SERIAL_parity, 
+    #                    stopbits=hbl.SERIAL_stopbits, 
+    #                    timeout=1)
+    ser = serial.Serial(port=hbl.SERIAL_COM1_port, 
+                         baudrate=hbl.SERIAL_COM1_baudrate, 
+                         bytesize=hbl.SERIAL_COM1_bytesize, 
+                         parity=hbl.SERIAL_COM1_parity, 
+                         stopbits=hbl.SERIAL_COM1_stopbits,
+                         timeout=hbl.SERIAL_COM1_timeout)
     ser.flushInput()
     
     cLPR = LPR("","","")
@@ -97,6 +103,53 @@ def startThreadSerial():
         
         time.sleep(0.01)
 
+    log.escribeSeparador(hbl.LOGS_hblSerial)
+    log.escribeLineaLog(hbl.LOGS_hblSerial, "SERIAL STOPED") 
+
+def startThreadSerial2(): 
+    #auxiliar.EscribirFuncion("startThreadSerial2")
+
+    global pi
+    global ser2
+
+    ser2 = serial.Serial(port=hbl.SERIAL_COM2_port, 
+                         baudrate=hbl.SERIAL_COM2_baudrate, 
+                         bytesize=hbl.SERIAL_COM2_bytesize, 
+                         parity=hbl.SERIAL_COM2_parity, 
+                         stopbits=hbl.SERIAL_COM2_stopbits,
+                         timeout=hbl.SERIAL_COM2_timeout)
+    #ser2.write(b"Serial start")
+    ser2.flushInput()
+              
+    while STOPSERIAL: 
+
+        if hbl.SERIAL_COM2_activado == 1:
+            
+
+                try: 
+                    Serial_COM2_Rx_Data = ser2.readline()
+                    #time.sleep(0.03)
+                    #data_left = ser2.inWaiting()
+                    #VG.Serial_COM2_Rx_Data +=ser2.read(data_left) 
+                    if(len(Serial_COM2_Rx_Data) > 0):
+                        variablesGlobales.lastDNI_Serial = Serial_COM2_Rx_Data.decode('utf-8', errors='ignore')
+                        
+                        log.escribeSeparador(hbl.LOGS_hblSerial)
+                        log.escribeLineaLog(hbl.LOGS_hblSerial, 
+                                            "Datos Serial2 recibidos : " + str(Serial_COM2_Rx_Data)) 
+
+                    time.sleep(0.03)
+    
+                except Exception as e:
+                
+                    exc_type, exc_obj, exc_tb = sys.exc_info() 
+                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1] 
+                    errorExcepcion = "ERROR : " + str(fname) + " - linea : " + str(sys.exc_info()[-1].tb_lineno) + " - mensaje : " + str(exc_obj) 
+
+                    log.escribeSeparador(hbl.LOGS_hblSerial)
+                    log.escribeLineaLog(hbl.LOGS_hblSerial, "Error : " + str(errorExcepcion)) 
+        
+        time.sleep(0.01)
         
 """ --------------------------------------------------------------------------------------------
 
@@ -105,23 +158,22 @@ def startThreadSerial():
 -------------------------------------------------------------------------------------------- """
 
 def inicializacion(pi2): 
+    #auxiliar.EscribirFuncion("inicializacion")
 
     global pi
  
     pi = pi2
-    
-    
 
-    if hbl.SERIAL_activado == 1:
+    if hbl.SERIAL_COM1_activado == 1:
  
         try:
 
-            serialHBL = threading.Thread(target=startThreadSerial, name='HBLSerial')
-            serialHBL.setDaemon(True)
+            serialHBL = threading.Thread(target=startThreadSerial, name='HBLSerial1')
+            serialHBL.setDaemon(False)
             serialHBL.start()   
 
             log.escribeSeparador(hbl.LOGS_hblSerial)
-            log.escribeLineaLog(hbl.LOGS_hblSerial, "Serial Start")  
+            log.escribeLineaLog(hbl.LOGS_hblSerial, "Serial1 Start")  
         
         except Exception as e:
               
@@ -130,4 +182,25 @@ def inicializacion(pi2):
             errorExcepcion = "ERROR : " + str(fname) + " - linea : " + str(sys.exc_info()[-1].tb_lineno) + " - mensaje : " + str(exc_obj) 
 
             log.escribeSeparador(hbl.LOGS_hblSerial)
-            log.escribeLineaLog(hbl.LOGS_hblSerial, "Error : " + str(errorExcepcion))         
+            log.escribeLineaLog(hbl.LOGS_hblSerial, "Error : " + str(errorExcepcion)) 
+
+    if hbl.SERIAL_COM2_activado == 1:
+ 
+        try:
+
+            serialHBL = threading.Thread(target=startThreadSerial2, name='HBLSerial2')
+            serialHBL.setDaemon(False)
+            serialHBL.start()   
+
+            log.escribeSeparador(hbl.LOGS_hblSerial)
+            log.escribeLineaLog(hbl.LOGS_hblSerial, "Serial2 Start")  
+        
+        except Exception as e:
+              
+            exc_type, exc_obj, exc_tb = sys.exc_info() 
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1] 
+            errorExcepcion = "ERROR : " + str(fname) + " - linea : " + str(sys.exc_info()[-1].tb_lineno) + " - mensaje : " + str(exc_obj) 
+
+            log.escribeSeparador(hbl.LOGS_hblSerial)
+            log.escribeLineaLog(hbl.LOGS_hblSerial, "Error : " + str(errorExcepcion))  
+      

@@ -116,7 +116,7 @@ class WebSocket(object):
     def stop(self):
         self.reRun = False
         self.ws.close()
-        
+        self.__LogReport("Websocket STOPED")
 
     def on_data(self,arg1,arg2,arg3):
         print("### New Data ###")

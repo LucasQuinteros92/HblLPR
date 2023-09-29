@@ -1,6 +1,6 @@
 from threading import Thread
 import time
-import datetime
+
 
 from modulos import auxiliar as auxiliar
 from modulos import hbl as hbl
@@ -10,6 +10,7 @@ from modulos import log as log
 from modulos import salidas as salidas
 from modulos import JSONFileManage as JSONFileManage
 from modulos import WebSocket as WebSocket
+from modulos import objetosAux as obAux
 import json
 import os
 
@@ -17,8 +18,6 @@ import os
 ID_ANY_PATENTE = "?"
 FACTOR_DOBLE  = 2
 FACTOR_SIMPLE = 1
-
-JSONFILEBBDD = '/usr/programas/hbl/modulos/BBDD_RUT_Patente.json'
 
 payload = json.dumps({
     "nuevaVisita": {
@@ -28,33 +27,6 @@ payload = json.dumps({
     "msjID" : "1685727490"
     
 })
-#{"conexionCliente":"NOMBRE O ID HBL"}
-#evento: {"nuevaVisita":{"id":"24997319-0","dominio":""},"msjID":"1685727490"}
-#respuesta:{"borrarMsj":"1685727490", "clientId":"NOMBRE O ID HBL"}
-#FACTOR: {"actualizacionConfig":{"nombre":"DOBLE_FACTOR_VALIDACION", "valor": true},"msjID":"1685991151"}
-#responder con msjID,
-
-#{"evento":"nuevoingreso", 
-# "datos":{
-#    "Persona": "3185254", 
-#    "Vehiculo": "AA123AA",
-#    "fechaHora": 1686767849000,
-#    "clientId": "100000000",
-#    "clientName":"HBL1"},
-# "msjID":"1686767849"}
-
-#{
-# 'msgId': 1686851088, 
-# 'data': '{
-#   "evento":"actualizacionConfig",
-#   "datos":{
-#           "Nombre":"DOBLE_FACTOR_VALIDACION",
-#   "Valor":{
-#          "Nombre":"DOBLE_FACTOR_VALIDACION","Valor":true}},
-#           "msjID":1686851088
-#           }',  
-# 'status': 1
-# }
 
 class Validacion_Doble_Factor(object):
 
@@ -63,11 +35,12 @@ class Validacion_Doble_Factor(object):
         self.patentes_esperadas = []
         self.patentes_LPR = []
         self.pi = pi
-        self.BBDD = ""
+        self.BBDD :dict  = {}
         self.lastDNI_reportado = ""
         self.doble_factor_activado = False
         self.objWebSock : WebSocket.WebSocket = objWebSock
-        self.BDJSON = JSONFileManage.JSONFileManage(JSONFILEBBDD)
+        self.JSONFILEBBDD = hbl.Validacion_Doble_Factor_JSONBBDDPATH
+        self.BDJSON = JSONFileManage.JSONFileManage(self.JSONFILEBBDD)
         self.__stop = True
         #self.objWebSock.ws.on_message = self.nuevoEventoRecibido
         #self.nuevoEventoRecibido(payload)
@@ -88,7 +61,7 @@ class Validacion_Doble_Factor(object):
         if evento == "nuevaVisita":
             #add : dict = evento.get("nuevaVisita")
             #self.agregar_Y_(add.get("id"),add.get("plate"))
-            res = self.BDJSON.add_Y_InFile(datos.get("Persona"),datos.get("wiegand"),datos.get("Vehiculo"))
+            res = self.BDJSON.add_Y_InFile(datos.get("Persona"),datos.get("Wiegand"),datos.get("Vehiculo"))
            
         elif evento ==  "remove":
             #remove :dict = datos.get("remove")
@@ -104,11 +77,11 @@ class Validacion_Doble_Factor(object):
         eventoRes = self.generarEventoRespuesta(data,msgId)
     
         self.enviar_AlServerSiEstaConectado(eventoRes)
-    
+        
     def generarEventoRespuesta(self,data : dict ,msgId):
         
         evento = json.dumps({
-            "evento": "RESPUESTAMSJ",
+            "evento": "",
             "datos" : {
                 "clientId" : hbl.WebSocket_ClientId,
                 "msgId": msgId,
@@ -170,26 +143,6 @@ class Validacion_Doble_Factor(object):
         self.doble_factor_activado = valor
         res = "FACTOR_ACTUALIZADO"
         return res
-    
-    def borrar_y_SiExisten(self,dni,patentes):
-        '''
-            Borrara dni y usuario si existen en la base de datos local
-        '''
-        print(dni, patentes)
-        if dni != None and patentes != None:
-            self.borrar_Del_(patentes,dni)
-            
-        elif patentes == None:
-            self.borrar_(dni)
-            
-    def borrar_Del_(self,patentes, dni):
-        print("borrar patente")
-            
-    def borrar_(self,dni):
-        print("borrar usuario")
-        
-    def agregar_Y_(self,dni,patente):
-        pass
         
     def __run(self):
         while self.__stop:
@@ -221,6 +174,7 @@ class Validacion_Doble_Factor(object):
     
     def stop(self):
         self.__stop = False
+        self.__LogReport("LPR STOPPED")
             
     def AccesoSegunFactoresYReportar(self):
         '''
@@ -314,7 +268,7 @@ class Validacion_Doble_Factor(object):
     
     def abrir_barrera(self):
         """Esta bien abrir la barrera asi ?"""
-        salidas.Salidas(self.pi).activaSalida(pin=hbl.DIG_out_pin_out1,tiempo=3000)
+        salidas.Salidas(self.pi).activaSalida(pin=hbl.DIG_out_pin_out2,tiempo=3000)
     
     def seDetectoPatente(self):
         return VG.ultimaPatente
@@ -338,8 +292,10 @@ class Validacion_Doble_Factor(object):
         if self.lastDNI_reportado != self.newDNI:
             
             self.lastDNI_reportado = self.newDNI
-            now = datetime.now()#.strftime('%Y-%m-%d %H:%M:%S')
+            now = datetime.now()
+            #.strftime('%Y-%m-%d %H:%M:%S')
             #evento = {"RUT":self.newDNI, "Patente":patente, "FechaHora":datetime.timestamp(now),"id":hbl.HblID}
+            
             eventoEntrada = self.generarEventoReporte("nuevoIngreso",self.newDNI,patente)
             self.reportar(eventoEntrada)
             
@@ -386,14 +342,14 @@ class Validacion_Doble_Factor(object):
         return json_data
 
     def resetNewDNI(self):
-        VG.lastDNI_WD = "NULL"
+        VG.lastDNI_Serial = "NULL"
         
     def get_dni(self):
         '''
             devuelve dni asociado al wiegand leido por la ras
         '''
         
-        return self.BDJSON.getDNIfromWD(VG.lastDNI_WD)
+        return self.BDJSON.getDNIfromWD(VG.lastDNI_Serial)
 
     def validar_patente(self):
         '''
@@ -404,40 +360,44 @@ class Validacion_Doble_Factor(object):
         try:
             self.patentes_esperadas = self.get_patentes_asociadas_from_BBDD()
             self.patentes_LPR = self.get_patentes_from_LPR()
-            for x in self.patentes_esperadas:
-                if x in self.patentes_LPR:
-                    return x
+            
             if "?" in self.patentes_esperadas:
                 return "?"
+            
+            for p in self.patentes_esperadas:
+                if p in self.patentes_LPR:
+                    return p
+            
             
             return "NO MATCH"
         except Exception as e:
             return "NO MATCH"
          
-
-    
     def dniValido(self):
         '''
             indica si el dni existe en la base de dato
             retorna booleano
         '''
-        return self.newDNI in self.BBDD
+        
+        for p in self.BBDD.keys():
+            if self.newDNI == p:
+                return True
+        
+        return False
     
     def esUnaPatenteValida(self):
         if self.dniValido() and self.validar_patente() != 'NO MATCH':
             
-            cumple = True
+            return True
         else:
             
-            cumple = False
-            
-        return cumple
-            
+            return False
+              
     def get_patentes_asociadas_from_BBDD(self):
         '''
            devuelve las patentes asociadas al dni en la base de datos
         '''    
-        return self.BBDD[self.newDNI]
+        return self.BBDD[self.newDNI]["patentes"]
                     
     def __LogReport(self,data ,factor = None):
         log.escribeSeparador(hbl.LOGS_hblDobleFactor) 
@@ -452,3 +412,23 @@ class Validacion_Doble_Factor(object):
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "DNI VALIDADO: " + str(data))
         else:
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, str(data))
+            
+    """def borrar_y_SiExisten(self,dni,patentes):
+        '''
+            Borrara dni y usuario si existen en la base de datos local
+        '''
+        print(dni, patentes)
+        if dni != None and patentes != None:
+            self.borrar_Del_(patentes,dni)
+            
+        elif patentes == None:
+            self.borrar_(dni)
+            
+    def borrar_Del_(self,patentes, dni):
+        print("borrar patente")
+            
+    def borrar_(self,dni):
+        print("borrar usuario")
+        
+    def agregar_Y_(self,dni,patente):
+        pass"""

@@ -40,10 +40,10 @@ HBLCORE_contadorReset = 0
 pressTick = 0
 
 ultimaPatente = ""
-listaPatentes = ["NULL"] * 10
+listaPatentes = [""] * 10
 listaDNIs = []
 
-lastDNI_WD = "NULL"
+lastDNI_Serial = "NULL"
 mutexBBDD_DNI_Patente = threading.Lock()
 mutexReporte_DNI_Patente = threading.Lock()
 newDataBBDD = True

@@ -84,13 +84,22 @@ def cargarParametros(archivo):
     global ON
     global OFF
 
-    global SERIAL_activado
-    global SERIAL_port
-    global SERIAL_baudrate
-    global SERIAL_bytesize
-    global SERIAL_parity
-    global SERIAL_stopbits 
- 
+    global SERIAL_COM1_activado
+    global SERIAL_COM1_port
+    global SERIAL_COM1_baudrate
+    global SERIAL_COM1_bytesize
+    global SERIAL_COM1_parity
+    global SERIAL_COM1_stopbits 
+    global SERIAL_COM1_timeout
+    
+    global SERIAL_COM2_activado
+    global SERIAL_COM2_port
+    global SERIAL_COM2_baudrate
+    global SERIAL_COM2_bytesize
+    global SERIAL_COM2_parity
+    global SERIAL_COM2_stopbits
+    global SERIAL_COM2_timeout
+    
     global HID_device1_activado
     global HID_device1_bufferSize 
     global HID_device1_timeout
@@ -197,6 +206,7 @@ def cargarParametros(archivo):
     global LOGS_hblDobleFactor
     global LOGS_WebSocket
     global LOGS_FileManage
+    global LOGS_Salidas
     
  
     global HBLCORE_hblDisplay_activado
@@ -223,7 +233,9 @@ def cargarParametros(archivo):
     global NETWORK_eth0_network
     global NETWORK_eth0_broadcast 
     global NETWORK_eth0_metric
-
+    global NETWORK_eth0_DNS
+    global NETWORK_eth0_gateway
+    
     global NETWORK_eth1_activado
     global NETWORK_eth1_dhcp
     global NETWORK_eth1_static_ip_address
@@ -294,7 +306,8 @@ def cargarParametros(archivo):
     
     global Validacion_Doble_Factor_activado 
     global Validacion_Doble_Factor_periodReport
-    global Validacion_Doble_Factor_reportFile 
+    global Validacion_Doble_Factor_reportFile
+    global Validacion_Doble_Factor_JSONBBDDPATH
     
     global WebSocket_activado
     global WebSocket_WebSocket_Host
@@ -424,13 +437,22 @@ def cargarParametros(archivo):
         OFF = 1
     
     # serial
-    SERIAL_activado=data["serial"]["activado"]
-    SERIAL_port=data["serial"]["port"]
-    SERIAL_baudrate=data["serial"]["baudrate"]
-    SERIAL_bytesize=data["serial"]["bytesize"]
-    SERIAL_parity=data["serial"]["parity"]
-    SERIAL_stopbits=data["serial"]["stopbits"]   
+    SERIAL_COM1_activado    =data["serial"]["COM1"]["activado"]
+    SERIAL_COM1_port        =data["serial"]["COM1"]["port"]
+    SERIAL_COM1_baudrate    =data["serial"]["COM1"]["baudrate"]
+    SERIAL_COM1_bytesize    =data["serial"]["COM1"]["bytesize"]
+    SERIAL_COM1_parity      =data["serial"]["COM1"]["parity"]
+    SERIAL_COM1_stopbits    =data["serial"]["COM1"]["stopbits"] 
+    SERIAL_COM1_timeout     =data["serial"]["COM1"]["timeout"]
 
+    SERIAL_COM2_activado    =data["serial"]["COM2"]["activado"]
+    SERIAL_COM2_port        =data["serial"]["COM2"]["port"]
+    SERIAL_COM2_baudrate    =data["serial"]["COM2"]["baudrate"]
+    SERIAL_COM2_bytesize    =data["serial"]["COM2"]["bytesize"]
+    SERIAL_COM2_parity      =data["serial"]["COM2"]["parity"]
+    SERIAL_COM2_stopbits    =data["serial"]["COM2"]["stopbits"]  
+    SERIAL_COM2_timeout     =data["serial"]["COM2"]["timeout"]
+    
     # hidDevices   
     HID_device1_activado=data["hidDevices"]["device1"]["activado"]
     HID_device1_bufferSize=data["hidDevices"]["device1"]["bufferSize"]
@@ -543,7 +565,8 @@ def cargarParametros(archivo):
     LOGS_hblRequest=data["logs"]["hblRequest"] 
     LOGS_hblDobleFactor=data["logs"]["hblDobleFactor"]
     LOGS_WebSocket=data["logs"]["hblWebSocket"]
-    LOGS_FileManage = data["logs"]["hblFileManage"] 
+    LOGS_FileManage = data["logs"]["hblFileManage"]
+    LOGS_Salidas    = data["logs"]["hblSalidas"]  
 
     # hblCore
     HBLCORE_hblDisplay_activado=data["hblCore"]["hblDisplay"]["activado"]
@@ -571,6 +594,8 @@ def cargarParametros(archivo):
     NETWORK_eth0_network=data["network"]["eth0"]["network"]
     NETWORK_eth0_broadcast=data["network"]["eth0"]["broadcast"]  
     NETWORK_eth0_metric=data["network"]["eth0"]["metric"]
+    NETWORK_eth0_gateway= data["network"]["eth0"]["gateway"]
+    NETWORK_eth0_DNS = data["network"]["eth0"]["DNS"]
 
     NETWORK_eth1_activado=data["network"]["eth1"]["activado"]
     NETWORK_eth1_dhcp=data["network"]["eth1"]["dhcp"]
@@ -641,18 +666,19 @@ def cargarParametros(archivo):
     CACHEO_repReleNegativo=data["cacheo"]["repReleNegativo"]
 
 
-    Validacion_Doble_Factor_activado=data["Validacion_Doble_Factor"]["activado"] 
-    Validacion_Doble_Factor_periodReport=data["Validacion_Doble_Factor"]["periodReport"]
-    Validacion_Doble_Factor_reportFile =data["Validacion_Doble_Factor"]["reportFile"] 
+    Validacion_Doble_Factor_activado        =data["Validacion_Doble_Factor"]["activado"] 
+    Validacion_Doble_Factor_periodReport    =data["Validacion_Doble_Factor"]["periodReport"]
+    Validacion_Doble_Factor_reportFile      =data["Validacion_Doble_Factor"]["reportFile"] 
+    Validacion_Doble_Factor_JSONBBDDPATH    =data["Validacion_Doble_Factor"]["JSONBBDDPATH"]
     
-    WebSocket_activado=data         ["WebSocket"]["activado"]
-    WebSocket_WebSocket_Host=data   ["WebSocket"]["WebSocket_Host"]
-    WebSocket_Api_Host=data         ["WebSocket"]["Api_Host"]
-    WebSocket_Tipo_Evento=data      ["WebSocket"]["Tipo_Evento"]
-    WebSocket_Device_ID=data        ["WebSocket"]["Device_ID"]
-    WebSocket_User=data             ["WebSocket"]["User"]
-    WebSocket_Password=data         ["WebSocket"]["Password"]
-    WebSocket_Header           =data["WebSocket"]["header"]
-    WebSocket_ClientName       =data["WebSocket"]["ClientName"]
-    WebSocket_ClientId         =data["WebSocket"]["ClientId"]
-    WebSocket_Token            =data["WebSocket"]["Token"]
+    WebSocket_activado          =data["WebSocket"]["activado"]
+    WebSocket_WebSocket_Host    =data["WebSocket"]["WebSocket_Host"]
+    WebSocket_Api_Host          =data["WebSocket"]["Api_Host"]
+    WebSocket_Tipo_Evento       =data["WebSocket"]["Tipo_Evento"]
+    WebSocket_Device_ID         =data["WebSocket"]["Device_ID"]
+    WebSocket_User              =data["WebSocket"]["User"]
+    WebSocket_Password          =data["WebSocket"]["Password"]
+    WebSocket_Header            =data["WebSocket"]["header"]
+    WebSocket_ClientName        =data["WebSocket"]["ClientName"]
+    WebSocket_ClientId          =data["WebSocket"]["ClientId"]
+    WebSocket_Token             =data["WebSocket"]["Token"]
