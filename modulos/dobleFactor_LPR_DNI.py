@@ -37,13 +37,14 @@ class Validacion_Doble_Factor(object):
         self.pi = pi
         self.BBDD :dict  = {}
         self.lastDNI_reportado = ""
-        self.doble_factor_activado = False
+        self.doble_factor_activado = True
         self.objWebSock : WebSocket.WebSocket = objWebSock
         self.JSONFILEBBDD = hbl.Validacion_Doble_Factor_JSONBBDDPATH
         self.BDJSON = JSONFileManage.JSONFileManage(self.JSONFILEBBDD)
         self.__stop = True
         #self.objWebSock.ws.on_message = self.nuevoEventoRecibido
         #self.nuevoEventoRecibido(payload)
+        self.__LogReport("LPR STARTED")
         if hbl.Validacion_Doble_Factor_activado == 1:
             self.t = Thread(target = self.__run, daemon= False,name="DobleFactor")
             self.t.start()
@@ -289,15 +290,17 @@ class Validacion_Doble_Factor(object):
     
     def siElDniEsNuevoReportar(self,patente):
         
-        if self.lastDNI_reportado != self.newDNI:
+        #if self.lastDNI_reportado != self.newDNI:
             
-            self.lastDNI_reportado = self.newDNI
-            now = datetime.now()
-            #.strftime('%Y-%m-%d %H:%M:%S')
-            #evento = {"RUT":self.newDNI, "Patente":patente, "FechaHora":datetime.timestamp(now),"id":hbl.HblID}
-            
-            eventoEntrada = self.generarEventoReporte("nuevoIngreso",self.newDNI,patente)
-            self.reportar(eventoEntrada)
+        self.lastDNI_reportado = self.newDNI
+        now = datetime.now()
+        #.strftime('%Y-%m-%d %H:%M:%S')
+        #evento = {"RUT":self.newDNI, "Patente":patente, "FechaHora":datetime.timestamp(now),"id":hbl.HblID}
+        
+        eventoEntrada = self.generarEventoReporte("nuevoIngreso",self.newDNI,patente)
+        self.reportar(eventoEntrada)
+        #else:
+        #    self.__LogReport("DNI ya reportado")
             
     def reportar(self,evento):
             self.enviar_AlServerSiEstaConectado(evento)

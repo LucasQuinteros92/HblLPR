@@ -78,6 +78,7 @@ def startThreadSerial():
                         """Elimino el ultimo caracter porque la camara me agrega una U al final"""
                         cLPR.Patente = cLPR.decodedData[:-1]
                         cLPR.Patente=cLPR.Patente.replace("\x00","")
+                        cLPR.Patente = cLPR.Patente.strip()
                         variablesGlobales.ultimaPatente = cLPR.Patente
                     except Exception as e:
                         print("Error en la lectura de patente")
@@ -104,7 +105,7 @@ def startThreadSerial():
         time.sleep(0.01)
 
     log.escribeSeparador(hbl.LOGS_hblSerial)
-    log.escribeLineaLog(hbl.LOGS_hblSerial, "SERIAL STOPED") 
+    log.escribeLineaLog(hbl.LOGS_hblSerial, "SERIAL1 STOPED") 
 
 def startThreadSerial2(): 
     #auxiliar.EscribirFuncion("startThreadSerial2")
@@ -132,13 +133,21 @@ def startThreadSerial2():
                     #data_left = ser2.inWaiting()
                     #VG.Serial_COM2_Rx_Data +=ser2.read(data_left) 
                     if(len(Serial_COM2_Rx_Data) > 0):
-                        variablesGlobales.lastDNI_Serial = Serial_COM2_Rx_Data.decode('utf-8', errors='ignore')
                         
-                        log.escribeSeparador(hbl.LOGS_hblSerial)
-                        log.escribeLineaLog(hbl.LOGS_hblSerial, 
-                                            "Datos Serial2 recibidos : " + str(Serial_COM2_Rx_Data)) 
+                        Serial_COM2_Rx_Data = Serial_COM2_Rx_Data.decode('utf-8', errors='ignore').strip()
+                        
+                        if(Serial_COM2_Rx_Data.isdigit()):
+                            variablesGlobales.lastDNI_Serial = Serial_COM2_Rx_Data  
+                            
+                            log.escribeSeparador(hbl.LOGS_hblSerial)
+                            log.escribeLineaLog(hbl.LOGS_hblSerial, 
+                                                "Datos Serial2 recibidos : " + variablesGlobales.lastDNI_Serial) 
+                        elif "Conectado" in Serial_COM2_Rx_Data:
+                            log.escribeSeparador(hbl.LOGS_hblSerial)
+                            log.escribeLineaLog(hbl.LOGS_hblSerial, 
+                                                "Datos Serial2 recibidos : " + "Conectado") 
 
-                    time.sleep(0.03)
+                        time.sleep(0.03)
     
                 except Exception as e:
                 
@@ -150,7 +159,8 @@ def startThreadSerial2():
                     log.escribeLineaLog(hbl.LOGS_hblSerial, "Error : " + str(errorExcepcion)) 
         
         time.sleep(0.01)
-        
+    log.escribeSeparador(hbl.LOGS_hblSerial)
+    log.escribeLineaLog(hbl.LOGS_hblSerial, "SERIAL2 STOPED") 
 """ --------------------------------------------------------------------------------------------
 
     inicializacion comunicacion Serial
