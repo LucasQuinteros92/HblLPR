@@ -276,7 +276,7 @@
         "activado": 1,
         "eth0": {
             "activado": 1,
-            "dhcp": 0,
+            "dhcp": 1,
             "static_ip_address": "172.30.2.131",
             "static_routers": "",
             "gateway": "172.30.2.1",
@@ -287,7 +287,7 @@
             "broadcast": "172.30.2.255"
         },
         "wlan0": {
-            "activado": 0,
+            "activado": 1,
             "dhcp": 1,
             "static_ip_address": "192.168.1.1/24",
             "static_routers": "192.168.1.1",
@@ -381,5 +381,5 @@
         "ClientId": "100000001",
         "ClientName": "HBL1"
     },
-    "LPRVersion": "V1.3"
+    "LPRVersion": "V1.5"
 }

@@ -30,18 +30,19 @@ payload = json.dumps({
 
 class Validacion_Doble_Factor(object):
 
-    def __init__(self, objWebSock, pi):
+    def __init__(self, objWebSock, pi,salidas):
         self.newDNI = "NULL"
         self.patentes_esperadas = []
         self.patentes_LPR = []
         self.pi = pi
         self.BBDD :dict  = {}
         self.lastDNI_reportado = ""
-        self.doble_factor_activado = True
+        self.doble_factor_activado = False
         self.objWebSock : WebSocket.WebSocket = objWebSock
         self.JSONFILEBBDD = hbl.Validacion_Doble_Factor_JSONBBDDPATH
         self.BDJSON = JSONFileManage.JSONFileManage(self.JSONFILEBBDD)
         self.__stop = True
+        self._salidas = salidas
         #self.objWebSock.ws.on_message = self.nuevoEventoRecibido
         #self.nuevoEventoRecibido(payload)
         self.__LogReport("LPR STARTED")
@@ -70,11 +71,13 @@ class Validacion_Doble_Factor(object):
         
         elif evento == "actualizacionConfig":
             #config : dict = evento.get("actualizacionConfig")
-            if datos.get("Nombre") == "DOBLE_FACTOR_VALIDACION":
-                res = self.cambiarFactor(datos.get('Valor'))
+            if datos.get("nombre") == "DOBLE_FACTOR_VALIDACION":
+                res = self.cambiarFactor(datos.get('valor'))
             else:
                 res= "ConfiguracionDesconocida"
-    
+        elif evento== "abrirBarrera":
+            self.PermitirAcceso()
+            
         eventoRes = self.generarEventoRespuesta(data,msgId)
     
         self.enviar_AlServerSiEstaConectado(eventoRes)
@@ -161,15 +164,16 @@ class Validacion_Doble_Factor(object):
                     self.reportarDeteccion(self.seDetectoPatente())
                     self.borrarPatenteDetectada()
                 
-            self.newDNI = self.get_dni()
+            self.newWiegand = self.get_wiegand()
              
-            if self.newDNI != "NULL":
-                
+            if self.newWiegand != "NULL":
+                self.newDNI = self.get_dniFromWiegand()
                 self.actualizaBBDDSiHayDataNueva()
                 
-                self.AccesoSegunFactoresYReportar()
+                self.accesoSegunFactoresReportar()
                 
                 self.resetNewDNI()
+                
             
             time.sleep(1)
     
@@ -189,12 +193,33 @@ class Validacion_Doble_Factor(object):
         
         else:
             self.PermitirAccesoSiCumpleYReportar(self.cumpleFactorSimple())
-    
+            
+    def accesoSegunFactoresReportar(self):
+        if self.factorDobleActivado():
+            if self.cumpleFactorDoble():
+                self.PermitirAcceso()
+                self.reportarAccesoSegunFactores()
+                
+            else:
+                
+                patentes = ""
+                if  not self.dniValido():
+                    self.__LogReport(f"NO CUMPLE FACTOR DOBLE\nDNI NO ENCONTRADO: {self.newDNI}\nWD LEIDO: {self.newWiegand}")
+                else:
+                    for patente in self.patentes_esperadas:
+                        patentes += "\n" + patente
+                    self.__LogReport(f"NO CUMPLE FACTOR DOBLE\nDNI ENCONTRADO: {self.newDNI} \nPATENTES NO ENCONTRADAS:  {patentes}")
+                
+        else:
+            self.PermitirAcceso()
+            self.reportarAccesoSegunFactores()
+            
     def PermitirAccesoSiCumpleYReportar(self,factorSimple,factorDoble = True):   
         '''
             Permitira el acceso si se cumplen ambos factores
             sino reportara cual fue el primer factor en no cumplirse
         '''
+        self.__LogReport(f"DNI : {self.newDNI} \n")
         if factorSimple and factorDoble:
         
             self.PermitirAcceso()
@@ -219,7 +244,8 @@ class Validacion_Doble_Factor(object):
             self.siElDniEsNuevoReportar(patente)
             
         else:
-            self.__LogReport("-", FACTOR_SIMPLE)
+            
+            self.__LogReport(self.newDNI, FACTOR_SIMPLE)
             self.siElDniEsNuevoReportar("-")
 
     def PermitirAcceso(self):
@@ -232,16 +258,20 @@ class Validacion_Doble_Factor(object):
     
     def cumpleFactorSimple(self):
         
-        if self.dniValido():
-            cumple = True
-        else:
-            cumple = False
-
+        #if self.dniValido():
+        #    cumple = True
+        #else:
+        #    cumple = False
+        #el factor simple lo realiza biostar
+        cumple = True
         return cumple
         
     def cumpleFactorDoble(self):
-
-        if self.esUnaPatenteValida():
+        '''
+            verifica que el dni, y la patentes son validas
+            buscandolas en la base de datos
+        '''
+        if self.dniValido() and self.esUnaPatenteValida():
             Cumple = True
         else:
             Cumple = False
@@ -268,8 +298,8 @@ class Validacion_Doble_Factor(object):
             return lista #Checkear esto
     
     def abrir_barrera(self):
-        """Esta bien abrir la barrera asi ?"""
-        salidas.Salidas(self.pi).activaSalida(pin=hbl.DIG_out_pin_out2,tiempo=3000)
+        
+        self._salidas.activaSalida(pin=hbl.DIG_out_pin_out2,tiempo=3000)
     
     def seDetectoPatente(self):
         return VG.ultimaPatente
@@ -346,12 +376,15 @@ class Validacion_Doble_Factor(object):
 
     def resetNewDNI(self):
         VG.lastDNI_Serial = "NULL"
-        
-    def get_dni(self):
+    
+    def get_wiegand(self):
+        return VG.lastDNI_Serial
+    
+    def get_dniFromWiegand(self):
         '''
             devuelve dni asociado al wiegand leido por la ras
         '''
-        
+        #self.BDJSON.getDNIfromWD()
         return self.BDJSON.getDNIfromWD(VG.lastDNI_Serial)
 
     def validar_patente(self):
@@ -389,7 +422,11 @@ class Validacion_Doble_Factor(object):
         return False
     
     def esUnaPatenteValida(self):
-        if self.dniValido() and self.validar_patente() != 'NO MATCH':
+        '''
+            verifica que la patente es valida
+            el dni debe existir en la base de datos
+        '''
+        if self.validar_patente() != 'NO MATCH':
             
             return True
         else:
@@ -407,13 +444,16 @@ class Validacion_Doble_Factor(object):
         if factor == FACTOR_DOBLE:
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "FACTOR DOBLE")
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "DNI : " + str(self.newDNI))
+            log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "WD LEIDO: " + self.newWiegand)
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "Patentes esperadas : " + str(self.patentes_esperadas))
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "Ultima patentes : " + str(self.patentes_LPR))
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "Patente '" + str(data) + "' validada")
         elif factor == FACTOR_SIMPLE:
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "FACTOR SIMPLE")
-            log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "DNI VALIDADO: " + str(data))
+            log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "DNI VALIDADO: " + self.newDNI)
+            log.escribeLineaLog(hbl.LOGS_hblDobleFactor, "WD LEIDO: " + self.newWiegand)
         else:
+            
             log.escribeLineaLog(hbl.LOGS_hblDobleFactor, str(data))
             
     """def borrar_y_SiExisten(self,dni,patentes):

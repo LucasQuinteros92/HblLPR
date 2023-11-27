@@ -40,7 +40,7 @@ HBLCORE_contadorReset = 0
 pressTick = 0
 
 ultimaPatente = ""
-listaPatentes = [""] * 10
+listaPatentes = ["XXX114"] * 10
 listaDNIs = []
 
 lastDNI_Serial = "NULL"

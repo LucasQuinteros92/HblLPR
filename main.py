@@ -159,7 +159,7 @@ if __name__ == "__main__":
    #cRequest = request.requestnblck(modo=0,dataType=2,file="data.json").start()
    
    
-   cLPR_DNI = dobleFactor_LPR_DNI.Validacion_Doble_Factor(objWebSock,pi=pi )
+   cLPR_DNI = dobleFactor_LPR_DNI.Validacion_Doble_Factor(objWebSock,pi,salidas )
    
    # heartbeat hblCore
    print("PID NUMBER",os.getpid())

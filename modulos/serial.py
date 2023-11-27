@@ -58,8 +58,6 @@ def startThreadSerial():
               
     while STOPSERIAL: 
 
-        if hbl.FUNC_modo == 8:
-
             try: 
                 
                 cLPR.dataSerial = ser.readline()
@@ -70,7 +68,7 @@ def startThreadSerial():
                 #received_data +=ser.read(data_left) 
 
                 if len(cLPR.dataSerial) > 0:
-
+                    #print(str(cLPR.dataSerial))
                     log.escribeSeparador(hbl.LOGS_hblSerial)
                     try:
                         """Decodifico el msg"""
@@ -102,14 +100,15 @@ def startThreadSerial():
                 log.escribeSeparador(hbl.LOGS_hblSerial)
                 log.escribeLineaLog(hbl.LOGS_hblSerial, "Error : " + str(errorExcepcion)) 
         
-        time.sleep(0.01)
+            time.sleep(0.01)
 
     log.escribeSeparador(hbl.LOGS_hblSerial)
     log.escribeLineaLog(hbl.LOGS_hblSerial, "SERIAL1 STOPED") 
 
 def startThreadSerial2(): 
     #auxiliar.EscribirFuncion("startThreadSerial2")
-
+    #uso hblReporte para no generar un nuevo log en productivo, y que sea mas claro
+    #cuando se recibe un wiegand via serial
     global pi
     global ser2
 
@@ -133,18 +132,18 @@ def startThreadSerial2():
                     #data_left = ser2.inWaiting()
                     #VG.Serial_COM2_Rx_Data +=ser2.read(data_left) 
                     if(len(Serial_COM2_Rx_Data) > 0):
-                        
+                        #Serial_COM2_Rx_Data = Serial_COM2_Rx_Data.hex().strip()
                         Serial_COM2_Rx_Data = Serial_COM2_Rx_Data.decode('utf-8', errors='ignore').strip()
-                        
+                        #print(Serial_COM2_Rx_Data)
                         if(Serial_COM2_Rx_Data.isdigit()):
                             variablesGlobales.lastDNI_Serial = Serial_COM2_Rx_Data  
                             
-                            log.escribeSeparador(hbl.LOGS_hblSerial)
-                            log.escribeLineaLog(hbl.LOGS_hblSerial, 
+                            log.escribeSeparador(hbl.LOGS_hblReporte)
+                            log.escribeLineaLog(hbl.LOGS_hblReporte, 
                                                 "Datos Serial2 recibidos : " + variablesGlobales.lastDNI_Serial) 
                         elif "Conectado" in Serial_COM2_Rx_Data:
-                            log.escribeSeparador(hbl.LOGS_hblSerial)
-                            log.escribeLineaLog(hbl.LOGS_hblSerial, 
+                            log.escribeSeparador(hbl.LOGS_hblReporte)
+                            log.escribeLineaLog(hbl.LOGS_hblReporte, 
                                                 "Datos Serial2 recibidos : " + "Conectado") 
 
                         time.sleep(0.03)
@@ -155,8 +154,8 @@ def startThreadSerial2():
                     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1] 
                     errorExcepcion = "ERROR : " + str(fname) + " - linea : " + str(sys.exc_info()[-1].tb_lineno) + " - mensaje : " + str(exc_obj) 
 
-                    log.escribeSeparador(hbl.LOGS_hblSerial)
-                    log.escribeLineaLog(hbl.LOGS_hblSerial, "Error : " + str(errorExcepcion)) 
+                    log.escribeSeparador(hbl.LOGS_hblReporte)
+                    log.escribeLineaLog(hbl.LOGS_hblReporte, "Error : " + str(errorExcepcion)) 
         
         time.sleep(0.01)
     log.escribeSeparador(hbl.LOGS_hblSerial)

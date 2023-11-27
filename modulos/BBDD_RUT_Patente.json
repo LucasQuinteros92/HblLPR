@@ -41,7 +41,10 @@
             "wiegand": "249973190",
             "patentes": [
                   "XYZ321",
-                  ""
+                  "",
+                  "undefined",
+                  "AAA000",
+                  "test-dominio"
             ]
       },
       "1234567-4": {
@@ -134,6 +137,7 @@
                   "undefined"
             ]
       },
+      
       "25073650-5": {
             "wiegand": "250736505",
             "patentes": [
